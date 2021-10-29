@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>鉄道模型シミュレーターNX ベンチマーク</title>
+<style>
+  div    {margin:auto; width: 720px; border: 1px solid #999999;}
+  h1, h2, h3, h4{margin:0px 0px 6px; text-align: center;}
+  h1     {padding:4px 0px 0px; background-color: #333399; color: #ffffff;}
+  table#score  {margin:10px auto; width: 320px; border: 1px solid #999999;}
+  pre#dxdiag {margin:4px auto; padding:4px; width: 700px; border: 1px solid #999999;}
+  td     {padding:0px 10px}
+  footer {padding:0px 6px; background-color: #999999; color: #ffffff; font-size: small;}
+  ul     {margin:0px}
+  section{font-size: x-small; color: #666666;}
+  div#graph {width: 600px; margin:0px auto 6px}
+</style>
+</head>
+<body>
+<div>
+  <h1>鉄道模型シミュレーターNX ベンチマーク</h1>
+  <h2>- 測定結果 -</h2>
+  <h3>総評</h3>
+  <table id="score">
+    <tr><td>総合スコア</td><td><strong>TOTAL_SCORE</strong></td></tr>
+    <tr><td>平均FPS</td><td>AVE_SCORE</td></tr>
+    <tr><td>最大FPS</td><td>MAX_SCORE</td></tr>
+    <tr><td>最小FPS</td><td>MIN_SCORE</td></tr>
+    <tr><td>表示解像度</td><td>DX×DY</td></tr>
+    <tr><td>測定日時</td><td>yyyy/MM/dd hh:mm</td></tr>
+  </table>
+<h4>システム情報</h4>
+<code>
+<pre id="dxdiag">
+                  OS: N/A
+                 CPU: N/A
+        メインメモリ: N/A
+                 GPU: N/A
+  VRAM(ビデオメモリ): N/A
+  ディスプレイ解像度: N/A
+     DirectX Version: N/A
+</pre>
+</code>
+<h4>LAYOUT</h4>
+<div id="graph"><canvas id="vrmnxbenchmark"></canvas></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
+<script>
+  var ctx = document.getElementById("vrmnxbenchmark");
+  var vrmnxbenchmark = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['0', '1', '2', '3'],
+      datasets: [
+        {
+          label: '秒間描画フレーム数',
+          data: [60, 60, 60, 60],
+          borderColor: "rgba(0,0,192,1)",
+          backgroundColor: "rgba(0,0,0,0)"
+        },
+      ],
+    },
+    options: {
+      title: {
+        display: false,
+      },
+      scales: {
+        xAxes: [{
+          gridLines: {
+            display: false
+          },
+          ticks: {
+            stepSize: 20,
+            callback: function(value) {return ((value % 10) == 0)? value : ''},
+          },
+        }],
+        yAxes: [{
+          ticks: {
+            suggestedMax: 240,
+            suggestedMin: 0,
+            stepSize: 60,
+            callback: function(value, index, values){return  value +  ' fps'}
+          },
+        }],
+      },
+    }
+  });
+</script>
+<footer>Powered by <a href="https://github.com/CaldiaNX/vrmnx-benchmark">鉄道模型シミュレーターNX ベンチマーク</a></footer>
+</div>
+</body>
+</html>
