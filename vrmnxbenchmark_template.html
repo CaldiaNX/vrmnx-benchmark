@@ -4,16 +4,15 @@
 <meta charset="utf-8">
 <title>鉄道模型シミュレーターNX ベンチマーク</title>
 <style>
-  div    {margin:auto; width: 720px; border: 1px solid #999999;}
-  h1, h2, h3, h4{margin:0px 0px 6px; text-align: center;}
-  h1     {padding:4px 0px 0px; background-color: #333399; color: #ffffff;}
-  table#score  {margin:10px auto; width: 320px; border: 1px solid #999999;}
-  pre#dxdiag {margin:4px auto; padding:4px; width: 700px; border: 1px solid #999999;}
-  td     {padding:0px 10px}
-  footer {padding:0px 6px; background-color: #999999; color: #ffffff; font-size: small;}
-  ul     {margin:0px}
-  section{font-size: x-small; color: #666666;}
-  div#graph {width: 600px; margin:0px auto 6px}
+  div        {width:720px; margin:auto; border:1px solid #666666;}
+  h1, h2, h3, h4{margin:0px; text-align:center; color:#333333;}
+  h1         {padding:4px 0px 0px; background-color:#333399; color:#ffffff;}
+  table#score{width:320px; margin:0px auto 6px; border:1px solid #999999;}
+  td         {padding:0px 10px}
+  div#graph  {width:600px; margin:0px auto 6px}
+  pre#dxdiag {margin:0px 6px 6px; padding:4px 6px; border:1px solid #999999;}
+  footer     {padding:0px 6px; background-color:#666666; color:#ffffff; font-size:small;}
+  a          {color:#ffffff;}
 </style>
 </head>
 <body>
@@ -29,20 +28,20 @@
     <tr><td>表示解像度</td><td>DX×DY</td></tr>
     <tr><td>測定日時</td><td>yyyy/MM/dd hh:mm</td></tr>
   </table>
+<h4>LAYOUT</h4>
+<div id="graph"><canvas id="vrmnxbenchmark"></canvas></div>
 <h4>システム情報</h4>
 <code>
 <pre id="dxdiag">
-                  OS: N/A
-                 CPU: N/A
-        メインメモリ: N/A
-                 GPU: N/A
-  VRAM(ビデオメモリ): N/A
-  ディスプレイ解像度: N/A
-     DirectX Version: N/A
+                OS: N/A
+               CPU: N/A
+      メインメモリ: N/A
+               GPU: N/A
+VRAM(ビデオメモリ): N/A
+ディスプレイ解像度: N/A
+   DirectX Version: N/A
 </pre>
 </code>
-<h4>LAYOUT</h4>
-<div id="graph"><canvas id="vrmnxbenchmark"></canvas></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"></script>
 <script>

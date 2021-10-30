@@ -1,6 +1,6 @@
 __title__ = "VRMNXベンチマーク Ver.1.0"
 __author__ = "Caldia"
-__update__  = "2021/10/29"
+__update__  = "2021/10/30"
 
 import vrmapi
 import shutil
@@ -15,11 +15,11 @@ vrmapi.LOG("import " + __title__)
 # main
 def vrmevent(obj,ev,param):
     if ev == 'init':
+        d = obj.GetDict()
         # フレームカウント
         obj.SetEventFrame()
         # 毎秒カウント
-        obj.SetEventTimer(1.0, 101)
-        d = obj.GetDict()
+        d['t_evid'] = obj.SetEventTimer(1.0)
         # 秒間スコア
         d['score'] = 0
         # 現在スコア
@@ -39,10 +39,17 @@ def vrmevent(obj,ev,param):
         d['count'] = 60
         # ベンチマーク期間カウンター
         d['count_now'] = d['count']
-        # ファイル出力フラグ
-        d['file_output'] = False
-        # dxdiagファイル事前出力
-        subprocess.Popen("dxdiag /t", shell=True)
+
+        # dxdiagファイルが無ければ出力
+        dir = vrmapi.SYSTEM().GetLayoutDir()
+        if(os.path.exists(dir + "dxdiag.txt") == False):
+            # 非同期実行
+            subprocess.Popen(dir + "vrmnxbenchmark.bat")
+            # 同期実行(画面が止まるため不採用)
+            #subprocess.run(dir + "vrmnxbenchmark.bat")
+            # 本来は直接動作させたいが出力されないケースがあるためbat経由
+            #subprocess.Popen("dxdiag /t", shell=True)
+
     elif ev == 'timer':
         d = obj.GetDict()
         # カウンター期間未満
@@ -63,13 +70,10 @@ def vrmevent(obj,ev,param):
             # ベンチマーク期間カウンターを進める
             d['count_now'] = d['count_now'] - 1
         else:
-            # timerイベントをリセット
-            obj.ResetEvent(101)
+            # イベントリセット
+            obj.ResetEvent(d['t_evid'])
             # ファイル出力
-            if d['file_output'] == False:
-                # ResetEventエラー対策
-                d['file_output'] = True
-                writeScore(vrmapi.SYSTEM().GetLayoutDir(), d)
+            writeScore(vrmapi.SYSTEM().GetLayoutDir(), d)
     elif ev == 'frame':
         d = obj.GetDict()
         g = vrmapi.ImGui()
@@ -133,27 +137,19 @@ def writeScore(path, d):
             flist = f.readlines()
             for t in flist:
                 if 'Operating System:' in t:
-                    s = s.replace('                  OS: N/A', t[5:-1])
-                    s = s.replace('Operating System:', '              OS:')
+                    s = s.replace('                OS: N/A', t[7:-1].replace('Operating System:', '              OS:'))
                 elif '  Processor:' in t:
-                    s = s.replace('                 CPU: N/A', t[5:-1])
-                    s = s.replace('Processor:', '      CPU:')
+                    s = s.replace('               CPU: N/A', t[7:-1].replace('Processor:', '      CPU:'))
                 elif '  Memory:' in t:
-                    s = s.replace('        メインメモリ: N/A', t[5:-1])
-                    s = s.replace('      Memory:', 'メインメモリ:')
+                    s = s.replace('      メインメモリ: N/A', t[7:-1].replace('      Memory:', 'メインメモリ:'))
                 elif '  Card name:' in t:
-                    s = s.replace('                 GPU: N/A', t[:-1])
-                    s = s.replace('Card name:', '      GPU:')
+                    s = s.replace('               GPU: N/A', t[2:-1].replace('Card name:', '      GPU:'))
                 elif '  Dedicated Memory:' in t:
-                    s = s.replace('  VRAM(ビデオメモリ): N/A', t[:-1])
-                    s = s.replace('  Dedicated Memory:', 'VRAM(ビデオメモリ):')
+                    s = s.replace('VRAM(ビデオメモリ): N/A', t[2:-1].replace('  Dedicated Memory:', 'VRAM(ビデオメモリ):'))
                 elif '  Current Mode:' in t:
-                    s = s.replace('  ディスプレイ解像度: N/A', t[:-1])
-                    s = s.replace('      Current Mode:', 'ディスプレイ解像度:')
-                elif '  DirectX Version:' in t:
-                    s = s.replace('     DirectX Version: N/A', t[5:-1])
-    else:
-        s = s.replace('                  OS: N/A\n', 'DirectX診断ツールを確認できませんでした。\n                  OS: N/A\n')
+                    s = s.replace('ディスプレイ解像度: N/A', t[2:-1].replace('      Current Mode:', 'ディスプレイ解像度:'))
+                elif 'DirectX Version:' in t:
+                    s = s.replace('   DirectX Version: N/A', t[7:-1])
 
     # 結果出力
     timeText = datetime.now().strftime('%Y%m%d_%H%M%S')
