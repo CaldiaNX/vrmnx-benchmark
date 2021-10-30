@@ -153,7 +153,7 @@ def writeScore(path, d):
                 elif '  DirectX Version:' in t:
                     s = s.replace('     DirectX Version: N/A', t[5:-1])
     else:
-        s = s.replace('                  OS: N/A\n', 'INFO］DirectX診断ツールを確認できませんでした。\n                  OS: N/A\n')
+        s = s.replace('                  OS: N/A\n', 'DirectX診断ツールを確認できませんでした。\n                  OS: N/A\n')
 
     # 結果出力
     timeText = datetime.now().strftime('%Y%m%d_%H%M%S')
