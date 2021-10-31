@@ -11,7 +11,7 @@
 動作に必要なファイルは以下の通りです。  
 
 ```
-vrmnxbenchmark.bat           # DirextX診断ツールファイル出力バッチファイル
+vrmnxbenchmark.bat           # DirextX診断ツールファイル出力バッチ
 vrmnxbenchmark.vrmnx         # サンプルレイアウト
 vrmnxbenchmark.py            # ベンチマークモジュール
 vrmnxbenchmark_template.html # ベンチマーク測定結果出力テンプレート
