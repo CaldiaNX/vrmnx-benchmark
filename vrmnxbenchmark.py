@@ -15,7 +15,6 @@ vrmapi.LOG("import " + __title__)
 
 # main
 def vrmevent(obj,ev,param):
-    global __eventUID__
     if ev == 'init':
         d = obj.GetDict()
         # フレームカウント
