@@ -1,6 +1,7 @@
-__title__ = "VRMNXベンチマーク Ver.1.0"
+__title__ = "VRMNXベンチマーク Ver.1.0b"
 __author__ = "Caldia"
-__update__  = "2021/10/30"
+__update__  = "2022/09/10"
+__eventUID__ = 1100002
 
 import vrmapi
 import shutil
@@ -14,64 +15,59 @@ vrmapi.LOG("import " + __title__)
 
 # main
 def vrmevent(obj,ev,param):
+    global __eventUID__
     if ev == 'init':
         d = obj.GetDict()
         # フレームカウント
         obj.SetEventFrame()
         # 毎秒カウント
-        d['t_evid'] = obj.SetEventTimer(1.0)
+        d['bm_t_evid'] = obj.SetEventTimer(1.0, __eventUID__)
         # 秒間スコア
-        d['score'] = 0
+        d['bm_Score'] = 0
         # 現在スコア
-        d['now_score'] = 0
+        d['bm_NowScore'] = 0
         # 総合スコア
-        d['total_score'] = 0
+        d['bm_TotalScore'] = 0
         # 秒間スコアリスト
-        d['graph'] = []
+        d['bm_Graph'] = []
         # 最大最小平均
-        d['max_score'] = 0
-        d['min_score'] = 999
-        d['ave_score'] = 0
+        d['bm_MaxScore'] = 0
+        d['bm_MinScore'] = 999
+        d['bm_AveScore'] = 0
         # 画面サイズ
-        d['dx'] = 0
-        d['dy'] = 0
+        d['bm_DX'] = 0
+        d['bm_DY'] = 0
         # ベンチマーク期間(秒)
-        d['count'] = 60
+        d['bm_Count'] = 60
         # ベンチマーク期間カウンター
-        d['count_now'] = d['count']
-
+        d['bm_CountNow'] = d['bm_Count']
         # dxdiagファイルが無ければ出力
         dir = vrmapi.SYSTEM().GetLayoutDir()
         if(os.path.exists(dir + "dxdiag.txt") == False):
             # 非同期実行
             subprocess.Popen(dir + "vrmnxbenchmark.bat")
-            # 同期実行(画面が止まるため不採用)
-            #subprocess.run(dir + "vrmnxbenchmark.bat")
-            # 本来は直接動作させたいが出力されないケースがあるためbat経由
-            #subprocess.Popen("dxdiag /t", shell=True)
-
-    elif ev == 'timer':
+    elif ev == 'timer' and param['eventUID'] == __eventUID__:
         d = obj.GetDict()
         # カウンター期間未満
-        if len(d['graph']) < d['count']:
+        if len(d['bm_Graph']) < d['bm_Count']:
             # 秒間スコア表示
-            d['now_score'] = d['score']
+            d['bm_NowScore'] = d['bm_Score']
             # 大小比較
-            if d['score'] > d['max_score']:
-                d['max_score'] = d['score']
-            if d['score'] < d['min_score']:
-                d['min_score'] = d['score']
+            if d['bm_Score'] > d['bm_MaxScore']:
+                d['bm_MaxScore'] = d['bm_Score']
+            if d['bm_Score'] < d['bm_MinScore']:
+                d['bm_MinScore'] = d['bm_Score']
             # 秒間スコアリストに追加
-            d['graph'].append(d['score'])
+            d['bm_Graph'].append(d['bm_Score'])
             # 秒間スコアをリセット
-            d['score'] = 0
-            d['dx'] = int(vrmapi.SYSTEM().GetViewDX())
-            d['dy'] = int(vrmapi.SYSTEM().GetViewDY())
+            d['bm_Score'] = 0
+            d['bm_DX'] = int(vrmapi.SYSTEM().GetViewDX())
+            d['bm_DY'] = int(vrmapi.SYSTEM().GetViewDY())
             # ベンチマーク期間カウンターを進める
-            d['count_now'] = d['count_now'] - 1
+            d['bm_CountNow'] = d['bm_CountNow'] - 1
         else:
             # イベントリセット
-            obj.ResetEvent(d['t_evid'])
+            obj.ResetEvent(d['bm_t_evid'])
             # ファイル出力
             writeScore(vrmapi.SYSTEM().GetLayoutDir(), d)
     elif ev == 'frame':
@@ -80,25 +76,26 @@ def vrmevent(obj,ev,param):
         
         g.Begin('w1',__title__)
         # カウンター期間未満
-        if len(d['graph']) < d['count']:
+        if len(d['bm_Graph']) < d['bm_Count']:
             # フレームスコア加算
-            d['score'] = d['score'] + 1
+            d['bm_Score'] = d['bm_Score'] + 1
             # トータルスコア加算
-            d['total_score'] = d['total_score'] + 1
+            d['bm_TotalScore'] = d['bm_TotalScore'] + 1
             # 表示
-            g.Text("総合スコア：" + str(d['total_score']))
-            g.Text("現在：{}  最大：{}  最小：{}".format(d['now_score'], d['max_score'], d['min_score']))
-            g.Text("画面：{}×{}".format(d['dx'], d['dy']))
-            g.Text("測定完了まであと" + str(d['count_now']) + "秒")
+            g.Text("総合スコア：" + str(d['bm_TotalScore']))
+            g.Text("現在：{}  最大：{}  最小：{}".format(d['bm_NowScore'], d['bm_MaxScore'], d['bm_MinScore']))
+            g.Text("画面：{}×{}".format(d['bm_DX'], d['bm_DY']))
+            g.Text("測定完了まであと" + str(d['bm_CountNow']) + "秒")
         else:
             # 終了表示
-            d['ave_score'] = int(d['total_score'] / d['count'])
-            g.Text("総合スコア：" + str(d['total_score']))
-            g.Text("平均：{}  最大：{}  最小：{}".format(d['ave_score'], d['max_score'], d['min_score']))
-            g.Text("画面：{}×{}".format(d['dx'], d['dy']))
+            d['bm_AveScore'] = int(d['bm_TotalScore'] / d['bm_Count'])
+            g.Text("総合スコア：" + str(d['bm_TotalScore']))
+            g.Text("平均：{}  最大：{}  最小：{}".format(d['bm_AveScore'], d['bm_MaxScore'], d['bm_MinScore']))
+            g.Text("画面：{}×{}".format(d['bm_DX'], d['bm_DY']))
             g.Text("測定終了！")
             g.Text("[ESC]でビュワーを終了。")
         g.End()
+
 
 # ファイル出力
 def writeScore(path, d):
@@ -109,11 +106,11 @@ def writeScore(path, d):
 
     # テンプレート置換
     s = s.replace('yyyy/MM/dd hh:mm', datetime.now().strftime('%Y/%m/%d %H:%M'))
-    s = s.replace('DX×DY', "{}×{}".format(d['dx'], d['dy']))
-    s = s.replace('TOTAL_SCORE', str(d['total_score']))
-    s = s.replace('AVE_SCORE', str(d['ave_score']))
-    s = s.replace('MAX_SCORE', str(d['max_score']))
-    s = s.replace('MIN_SCORE', str(d['min_score']))
+    s = s.replace('DX×DY', "{}×{}".format(d['bm_DX'], d['bm_DY']))
+    s = s.replace('TOTAL_SCORE', str(d['bm_TotalScore']))
+    s = s.replace('AVE_SCORE', str(d['bm_AveScore']))
+    s = s.replace('MAX_SCORE', str(d['bm_MaxScore']))
+    s = s.replace('MIN_SCORE', str(d['bm_MinScore']))
     s = s.replace('総評', ScoreRank(d))
     s = s.replace('LAYOUT', os.path.basename(vrmapi.SYSTEM().GetLayoutPath()))
 
@@ -121,7 +118,7 @@ def writeScore(path, d):
     c = 0
     sl = list()
     sg = list()
-    for l in d['graph']:
+    for l in d['bm_Graph']:
         sl.append('\'{}\', '.format(c))
         sg.append('{}, '.format(l))
         c = c + 1
@@ -159,17 +156,18 @@ def writeScore(path, d):
     # 結果ブラウザ表示
     subprocess.Popen(filename, shell=True)
 
+
 # 総評
 def ScoreRank(d):
-    if d['ave_score'] < 10:
+    if d['bm_AveScore'] < 10:
         return "Ｄランク：動かすことが厳しい環境です"
-    elif d['ave_score'] < 30:
+    elif d['bm_AveScore'] < 30:
         return "Ｃランク：遊ぶことが厳しい環境です"
-    elif d['ave_score'] < 60:
+    elif d['bm_AveScore'] < 60:
         return "Ｂランク：重たいですが遊ぶことができます"
-    elif d['ave_score'] < 90:
+    elif d['bm_AveScore'] < 90:
         return "Ａランク：快適に遊ぶことができます"
-    elif d['ave_score'] < 120:
+    elif d['bm_AveScore'] < 120:
         return "Ｓランク：非常に快適に遊ぶことができます！"
     else:
         return "SSランク：ゲーミングモニターで非常に快適に遊ぶことができます！！"
